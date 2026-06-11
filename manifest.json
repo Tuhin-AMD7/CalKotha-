@@ -1,0 +1,120 @@
+{
+  "name": "CalKotha — Explore Kolkata Through Time",
+  "short_name": "CalKotha",
+  "description": "Discover Kolkata's heritage through stories, maps, AR, stamps, and immersive exploration. Your personal heritage passport for the City of Joy.",
+  "start_url": "/index.html",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#1A0A04",
+  "theme_color": "#1A0A04",
+  "lang": "en-IN",
+  "dir": "ltr",
+  "categories": ["travel", "education", "lifestyle"],
+
+  "icons": [
+    {
+      "src": "assets/logo.png",
+      "sizes": "48x48",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "assets/logo.png",
+      "sizes": "72x72",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "assets/logo.png",
+      "sizes": "96x96",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "assets/logo.png",
+      "sizes": "128x128",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "assets/logo.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "assets/logo.png",
+      "sizes": "256x256",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "assets/logo.png",
+      "sizes": "384x384",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "assets/logo.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+
+  "screenshots": [
+    {
+      "src": "assets/victoria-memorial.jpg",
+      "sizes": "1280x720",
+      "type": "image/jpeg",
+      "form_factor": "wide",
+      "label": "CalKotha Heritage Map — Explore 300+ sites"
+    },
+    {
+      "src": "assets/howrah-bridge.jpg",
+      "sizes": "720x1280",
+      "type": "image/jpeg",
+      "form_factor": "narrow",
+      "label": "Heritage Passport — Collect Stamps & XP"
+    }
+  ],
+
+  "shortcuts": [
+    {
+      "name": "Heritage Map",
+      "short_name": "Map",
+      "description": "Open the interactive heritage map of Kolkata",
+      "url": "/index.html#map-page",
+      "icons": [{ "src": "assets/logo.png", "sizes": "96x96" }]
+    },
+    {
+      "name": "My Passport",
+      "short_name": "Passport",
+      "description": "View your heritage explorer passport",
+      "url": "/index.html#passport",
+      "icons": [{ "src": "assets/logo.png", "sizes": "96x96" }]
+    },
+    {
+      "name": "Missions",
+      "short_name": "Missions",
+      "description": "Check your active heritage missions",
+      "url": "/index.html#missions",
+      "icons": [{ "src": "assets/logo.png", "sizes": "96x96" }]
+    },
+    {
+      "name": "AI Guide",
+      "short_name": "AI Guide",
+      "description": "Chat with CalKotha AI Heritage Guide",
+      "url": "/index.html#ai-guide-page",
+      "icons": [{ "src": "assets/logo.png", "sizes": "96x96" }]
+    }
+  ],
+
+  "related_applications": [],
+  "prefer_related_applications": false,
+
+  "protocol_handlers": [],
+
+  "id": "calkotha-heritage-explorer-2026"
+}

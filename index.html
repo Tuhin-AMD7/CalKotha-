@@ -1,0 +1,939 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="CalKotha — Explore Kolkata's heritage sites, stories, and hidden history through an immersive digital journey.">
+<meta name="theme-color" content="#1A0A04">
+<title>CalKotha — Explore Kolkata Through Time</title>
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="assets/logo.png">
+<link rel="icon" type="image/png" href="assets/logo.png">
+<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+</head>
+<body>
+
+<!-- SPLASH -->
+<div id="splash" class="page active">
+  <div class="splash-progress-bar"></div>
+  <div style="position:relative;z-index:2;padding:40px 20px;text-align:center;">
+    <div class="splash-logo-wrap">
+      <img src="assets/logo.png" alt="CalKotha Logo">
+    </div>
+    <h1 class="splash-title">CalKotha</h1>
+    <div class="splash-divider"></div>
+    <p class="splash-sub">Explore Kolkata. Through Time.</p>
+    <p class="splash-bengali">কলকাতার ঐতিহ্য আবিষ্কার করুন</p>
+    <div class="splash-btn-wrap">
+      <button class="btn btn-primary btn-lg" onclick="startExploring()"><i class="fa fa-compass"></i> Begin Exploration</button>
+      <button class="btn btn-secondary" onclick="startExploring()"><i class="fa fa-map"></i> Open Map</button>
+    </div>
+  </div>
+</div>
+
+<!-- GLASS BACK BUTTON -->
+<button class="glass-back-btn" id="floatingBack" onclick="goBack()" title="Go Back">
+  <i class="fa fa-arrow-left"></i>
+</button>
+
+<!-- HOME PAGE -->
+<div id="home" class="page">
+  <!-- DEV NOTICE -->
+  <div class="dev-caution-banner" id="devCautionHome">
+    <div class="dev-caution-icon">⚠️</div>
+    <div class="dev-caution-text">
+      <strong>🛠 Developer Preview</strong> — CalKotha v2.0 · GPS stamp unlock, AR scanning, and AI route generation are prototype features. Map routes follow real roads via OSRM. <em>Judges: all core heritage data is real and verified.</em>
+    </div>
+    <button onclick="document.getElementById('devCautionHome').style.display='none'" class="dev-caution-close">✕</button>
+  </div>
+
+  <!-- Hero -->
+  <section class="hero">
+    <div class="hero-bg-pattern"></div>
+    <div class="hero-content">
+      <div class="hero-eyebrow">Kolkata Heritage Explorer</div>
+      <div class="hero-feature-showcase" id="heroFeatureShowcase">
+        <span class="feature-showcase-text" id="featureShowcaseText">Explore Kolkata by Tram</span>
+        <span class="feature-showcase-dot"></span>
+      </div>
+      <h1 class="hero-title">Discover<br><span>Kolkata</span><br>Through Time</h1>
+      <p class="hero-sub">Every street has a story. Every stone has a memory.</p>
+      <p class="hero-desc">Explore 70+ heritage locations, uncover forgotten histories, collect GPS-verified stamps, and build your personal heritage passport across Kolkata's most storied landmarks.</p>
+      <div class="hero-btn-row">
+        <button class="btn btn-primary btn-lg" onclick="showPage('map-page')"><i class="fa fa-map-marked-alt"></i> Explore Map</button>
+        <button class="btn btn-secondary" onclick="showPage('stories-page')"><i class="fa fa-book-open"></i> Read Stories</button>
+      </div>
+      <div class="hero-stats">
+        <div class="hero-stat"><div class="hero-stat-num" data-count="70">0</div><div class="hero-stat-label">Heritage Sites</div></div>
+        <div class="hero-stat"><div class="hero-stat-num" data-count="45">0</div><div class="hero-stat-label">Stories</div></div>
+        <div class="hero-stat"><div class="hero-stat-num" data-count="18">0</div><div class="hero-stat-label">Heritage Routes</div></div>
+        <div class="hero-stat"><div class="hero-stat-num" data-count="12">0</div><div class="hero-stat-label">Hidden Gems</div></div>
+      </div>
+    </div>
+    <div class="hero-visual"><img src="assets/logo.png" alt="CalKotha" class="hero-logo-large"></div>
+  </section>
+
+  <!-- Stack Locations Section -->
+  <section class="section-padded">
+    <div class="container">
+      <div class="section-header reveal">
+        <div class="section-label">Featured Heritage</div>
+        <h2 class="section-title">Iconic Kolkata Locations</h2>
+        <p class="section-desc">Begin your journey through the most storied landmarks of the City of Joy</p>
+      </div>
+      <!-- Stack Component -->
+      <div class="stack-section" style="margin-bottom:8px;">
+        <div class="stack-wrapper" id="locationsStack">
+          <div style="width:240px;height:240px;position:relative;margin:0 auto;">
+            <div id="stackContainer" class="stack-container"></div>
+          </div>
+        </div>
+        <p class="stack-hint">↕ Drag or click to cycle through locations</p>
+        <div class="locations-grid" id="locationsGrid"></div>
+        <div style="text-align:center;margin-top:36px;">
+          <button class="btn btn-ghost" onclick="showPage('search-page')">View All Locations <i class="fa fa-arrow-right"></i></button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Stories with Scroll Reveal -->
+  <section class="section-padded section-dark">
+    <div class="container">
+      <div class="section-header reveal">
+        <div class="section-label">Heritage Narratives</div>
+        <h2 class="section-title">Stories That Shaped Kolkata</h2>
+        <p class="section-desc">Dive into curated historical narratives from Kolkata's golden age</p>
+      </div>
+      <!-- Stack for stories -->
+      <div class="stack-section">
+        <div style="width:240px;height:240px;position:relative;margin:0 auto 12px;">
+          <div id="storiesStackContainer" class="stack-container"></div>
+        </div>
+        <p class="stack-hint">↕ Drag or click to browse stories</p>
+      </div>
+      <div class="stories-scroll" id="storiesScroll"></div>
+      <div style="text-align:center;margin-top:32px;">
+        <button class="btn btn-secondary" onclick="showPage('stories-page')">All Stories <i class="fa fa-arrow-right"></i></button>
+      </div>
+    </div>
+  </section>
+
+  <!-- Routes -->
+  <section class="section-padded">
+    <div class="container">
+      <div class="section-header reveal">
+        <div class="section-label">Exploration Routes</div>
+        <h2 class="section-title">Curated Heritage Trails</h2>
+        <p class="section-desc">Follow hand-crafted routes designed to reveal Kolkata's layered history</p>
+      </div>
+      <div class="routes-grid" id="routesGrid"></div>
+    </div>
+  </section>
+
+  <!-- Passport CTA -->
+  <section class="section-padded section-dark" style="text-align:center;">
+    <div class="container">
+      <div class="section-label reveal">Your Heritage Journey</div>
+      <h2 class="section-title reveal" style="color:var(--tram-gold);max-width:600px;margin:12px auto;">Build Your Heritage Passport</h2>
+      <p class="section-desc reveal" style="color:var(--sepia-pale);max-width:520px;margin:0 auto 32px;">Visit locations near heritage sites — your GPS will automatically award stamps. Build your collection, unlock your legacy.</p>
+      <div style="display:flex;gap:16px;justify-content:center;flex-wrap:wrap;" class="reveal">
+        <button class="btn btn-gold btn-lg" onclick="openOnboarding()"><i class="fa fa-passport"></i> Create My Passport</button>
+        <button class="btn btn-secondary" onclick="showPage('passport')"><i class="fa fa-eye"></i> View Passport</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- GPS Stamp Info -->
+  <section class="section-padded" style="background:linear-gradient(135deg,rgba(201,162,39,0.06),transparent);">
+    <div class="container">
+      <div class="section-header reveal">
+        <div class="section-label">How Stamps Work</div>
+        <h2 class="section-title">GPS-Powered Collection</h2>
+      </div>
+      <div class="stamp-how-grid">
+        <div class="stamp-how-card reveal">
+          <div class="stamp-how-icon">📍</div>
+          <h3>Visit the Site</h3>
+          <p>Travel to a heritage site in Kolkata. Make sure location services are enabled.</p>
+        </div>
+        <div class="stamp-how-card reveal">
+          <div class="stamp-how-icon">📡</div>
+          <h3>GPS Detects You</h3>
+          <p>When you're within 200m of a heritage site, CalKotha automatically detects your presence.</p>
+        </div>
+        <div class="stamp-how-card reveal">
+          <div class="stamp-how-icon">📮</div>
+          <h3>Stamp Awarded</h3>
+          <p>A heritage stamp is added to your binder with rarity, XP value, and visit date. Rarer sites = rarer stamps.</p>
+        </div>
+        <div class="stamp-how-card reveal">
+          <div class="stamp-how-icon">⭐</div>
+          <h3>Earn XP</h3>
+          <p>XP is automatically added to your passport. Level up to unlock special explorer titles.</p>
+        </div>
+      </div>
+      <div class="dev-caution-inline reveal">
+        <span>🛠 <strong>Dev Note:</strong> GPS stamp detection uses the browser Geolocation API. In this prototype, stamps can also be manually collected from heritage site pages for judging purposes.</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- Founders Section — ProfileCard -->
+  <section class="section-padded founders-section" id="founders-section">
+    <div class="container">
+      <div class="section-header reveal">
+        <div class="section-label">The Team Behind The Platform</div>
+        <h2 class="section-title">Meet The Builders</h2>
+        <p class="section-desc">The people preserving Kolkata's stories through technology.</p>
+      </div>
+      <div class="rb-founders-grid">
+        <!-- Tuhin Biswas Card -->
+        <div class="rb-card-scene" id="rbScene1">
+          <div class="rb-card-glow"></div>
+          <div class="rb-card" id="rbCard1" data-founder="tuhin">
+            <div class="rb-card-bg"></div>
+            <div class="rb-card-foil"></div>
+            <div class="rb-card-glare"></div>
+            <div class="rb-card-content">
+              <div class="rb-card-avatar-area">
+                <img class="rb-card-avatar-img" id="rbAvatar1" src="assets/tuhin.png" alt="Tuhin Biswas"
+                  onerror="this.style.display='none';document.getElementById('rbAvatarFb1').style.display='flex';">
+                <div class="rb-card-avatar-fallback" id="rbAvatarFb1" style="display:none;">🏛️</div>
+                <div class="rb-card-avatar-fade"></div>
+                <div class="rb-card-bio-chip">Founder · UI/UX</div>
+              </div>
+              <div class="rb-card-name-overlay">
+                <div class="rb-card-name-big">Tuhin Biswas</div>
+                <div class="rb-card-role-big">Frontend · Design · Vision</div>
+              </div>
+              <div class="rb-card-info">
+                <div class="rb-card-identity">
+                  <div class="rb-card-mini-avatar">
+                    <img src="assets/tuhin.png" alt="Tuhin" onerror="this.style.display='none';this.parentNode.innerHTML='🏛️';">
+                  </div>
+                  <div class="rb-card-text">
+                    <div class="rb-card-name">@tuhin_biswas</div>
+                    <div class="rb-card-role">Building CalKotha</div>
+                  </div>
+                </div>
+                <button class="rb-card-action-btn" onclick="showPage('contact-page')" type="button">Contact</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Priyanshu Saha Card -->
+        <div class="rb-card-scene" id="rbScene2">
+          <div class="rb-card-glow"></div>
+          <div class="rb-card rb-card-blue" id="rbCard2" data-founder="priyanshu">
+            <div class="rb-card-bg"></div>
+            <div class="rb-card-foil"></div>
+            <div class="rb-card-glare"></div>
+            <div class="rb-card-content">
+              <div class="rb-card-avatar-area">
+                <img class="rb-card-avatar-img" id="rbAvatar2" src="assets/priyanshu.png" alt="Priyanshu Saha"
+                  onerror="this.style.display='none';document.getElementById('rbAvatarFb2').style.display='flex';">
+                <div class="rb-card-avatar-fallback" id="rbAvatarFb2" style="display:none;">⚙️</div>
+                <div class="rb-card-avatar-fade"></div>
+                <div class="rb-card-bio-chip">DB · Backend</div>
+              </div>
+              <div class="rb-card-name-overlay">
+                <div class="rb-card-name-big">Priyanshu Saha</div>
+                <div class="rb-card-role-big">Database · Management · APIs</div>
+              </div>
+              <div class="rb-card-info">
+                <div class="rb-card-identity">
+                  <div class="rb-card-mini-avatar">
+                    <img src="assets/priyanshu.png" alt="Priyanshu" onerror="this.style.display='none';this.parentNode.innerHTML='⚙️';">
+                  </div>
+                  <div class="rb-card-text">
+                    <div class="rb-card-name">@priyanshu_saha</div>
+                    <div class="rb-card-role">Database & Ops</div>
+                  </div>
+                </div>
+                <button class="rb-card-action-btn" onclick="showPage('contact-page')" type="button">Contact</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- AI Guide FAB -->
+  <button class="ai-guide-fab" onclick="showPage('ai-guide-page')" title="CalKotha AI Guide">
+    <i class="fa fa-robot"></i>
+    <span class="ai-guide-fab-label">AI Guide</span>
+    <span class="ai-guide-fab-ping"></span>
+  </button>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="footer-grid">
+      <div class="footer-brand">
+        <div class="footer-logo">CalKotha</div>
+        <p class="footer-desc">A premium digital heritage exploration platform for Kolkata. Discover stories, collect GPS stamps, and explore the City of Joy — through time.</p>
+      </div>
+      <div>
+        <div class="footer-col-title">Explore</div>
+        <span class="footer-link" onclick="showPage('map-page')">Heritage Map</span>
+        <span class="footer-link" onclick="showPage('stories-page')">Stories</span>
+        <span class="footer-link" onclick="showPage('tram-page')">Tram Explorer</span>
+        <span class="footer-link" onclick="showPage('search-page')">Search</span>
+      </div>
+      <div>
+        <div class="footer-col-title">Platform</div>
+        <span class="footer-link" onclick="showPage('passport')">My Passport</span>
+        <span class="footer-link" onclick="showPage('stamp-binder')">Stamp Binder</span>
+        <span class="footer-link" onclick="showPage('ar-page')">AR Time Travel</span>
+        <span class="footer-link" onclick="showPage('settings-page')">Settings</span>
+      </div>
+      <div>
+        <div class="footer-col-title">About</div>
+        <span class="footer-link" onclick="showPage('community-page')">Community</span>
+        <span class="footer-link" onclick="showPage('contact-page')">Contact</span>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span>© 2026 CalKotha — Explore Kolkata. Through Time.</span>
+      <span>কলকাতার ঐতিহ্য রক্ষা করুন</span>
+    </div>
+  </footer>
+</div>
+
+<!-- MAP PAGE -->
+<div id="map-page" class="page">
+  <div class="dev-caution-banner" id="devCautionMap">
+    <div class="dev-caution-icon">🗺️</div>
+    <div class="dev-caution-text"><strong>Map Routing Note:</strong> Routes use OSRM for real-road following. AI route generation is a prototype. Google Maps Platform integration requires API key setup in production.</div>
+    <button onclick="document.getElementById('devCautionMap').style.display='none'" class="dev-caution-close">✕</button>
+  </div>
+  <div class="map-toolbar">
+    <div class="map-search-wrap">
+      <i class="fa fa-search" style="color:var(--tram-gold);"></i>
+      <input type="text" placeholder="Search heritage sites..." id="mapSearchInput" oninput="filterMapMarkers(this.value)">
+    </div>
+    <div class="map-filter-btns">
+      <button class="map-filter-btn active" onclick="setMapFilter('all', this)">All</button>
+      <button class="map-filter-btn" onclick="setMapFilter('colonial', this)">Colonial</button>
+      <button class="map-filter-btn" onclick="setMapFilter('religious', this)">Religious</button>
+      <button class="map-filter-btn" onclick="setMapFilter('cultural', this)">Cultural</button>
+      <button class="map-filter-btn" onclick="setMapFilter('hidden', this)">Hidden Gems</button>
+      <button class="map-filter-btn" onclick="setMapFilter('tram', this)">🚃 Tram</button>
+    </div>
+    <div class="map-action-btns">
+      <button class="map-action-btn" onclick="getUserLocation()" title="My Location"><i class="fa fa-crosshairs"></i></button>
+      <button class="map-action-btn" onclick="showPage('ar-page')" title="AR Mode"><i class="fa fa-camera"></i> AR</button>
+      <button class="map-action-btn" onclick="openAIRouteEngine()" title="AI Route"><i class="fa fa-robot"></i> AI Route</button>
+    </div>
+  </div>
+  <div id="map"></div>
+  <div class="ai-route-panel" id="aiRoutePanel" style="display:none;">
+    <div class="ai-route-header">
+      <span class="ai-route-title"><i class="fa fa-robot"></i> AI Route Generator</span>
+      <button onclick="closeAIRouteEngine()" style="background:none;border:none;color:var(--sepia-pale);font-size:18px;cursor:pointer;">✕</button>
+    </div>
+    <div class="ai-route-body">
+      <div class="dev-caution-inline" style="margin-bottom:16px;">🛠 <strong>Dev Note:</strong> Routes are algorithmically generated from heritage data. Real-road routing uses OSRM API.</div>
+      <div class="form-group">
+        <label class="form-label">Your Interests</label>
+        <select class="form-input" id="aiInterest">
+          <option value="history">Colonial History</option>
+          <option value="culture">Culture & Art</option>
+          <option value="religion">Sacred Sites</option>
+          <option value="hidden">Hidden Gems</option>
+          <option value="education">Educational</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Available Time</label>
+        <select class="form-input" id="aiTime">
+          <option value="2">2 Hours</option>
+          <option value="4">Half Day (4 hrs)</option>
+          <option value="8">Full Day (8 hrs)</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Transport</label>
+        <select class="form-input" id="aiTransport">
+          <option value="tram">Tram + Walking</option>
+          <option value="walking">Walking Only</option>
+          <option value="mixed">Mixed</option>
+        </select>
+      </div>
+      <button class="btn btn-primary" style="width:100%;justify-content:center;" onclick="generateAIRoute()"><i class="fa fa-magic"></i> Generate My Route</button>
+      <div id="aiRouteResult" style="margin-top:16px;"></div>
+    </div>
+  </div>
+</div>
+
+<!-- HERITAGE DETAIL PAGE -->
+<div id="heritage" class="page">
+  <div class="heritage-hero">
+    <div class="heritage-hero-inner">
+      <div class="heritage-breadcrumb" onclick="goBack()"><i class="fa fa-arrow-left"></i> Back to Locations</div>
+      <h1 class="heritage-title" id="heritageName">Victoria Memorial</h1>
+      <p class="heritage-subtitle" id="heritageSubtitle">The Crown Jewel of Colonial Kolkata</p>
+      <div class="heritage-meta-row">
+        <div class="heritage-meta-item"><i class="fa fa-calendar"></i> <span id="heritageYear">Est. 1921</span></div>
+        <div class="heritage-meta-item"><i class="fa fa-layer-group"></i> <span id="heritageStyle">Indo-Saracenic Revival</span></div>
+        <div class="heritage-meta-item"><i class="fa fa-map-marker-alt"></i> <span id="heritageLocation">Maidan, Kolkata</span></div>
+      </div>
+    </div>
+  </div>
+  <div class="heritage-body" id="heritageBody"></div>
+</div>
+
+<!-- STORIES PAGE -->
+<div id="stories-page" class="page">
+  <section class="search-hero">
+    <div class="section-label" style="color:var(--sepia-light);">Heritage Narratives</div>
+    <h2 class="section-title" style="color:var(--tram-gold);margin-bottom:8px;">Stories of Kolkata</h2>
+    <p class="section-desc">45+ immersive historical narratives from the City of Joy</p>
+  </section>
+  <!-- Stack for stories page -->
+  <div class="container" style="margin-bottom:24px;">
+    <div style="width:240px;height:240px;position:relative;margin:0 auto 8px;">
+      <div id="storiesPageStackContainer" class="stack-container"></div>
+    </div>
+    <p class="stack-hint" style="text-align:center;">↕ Drag the stack or click cards below</p>
+  </div>
+  <div class="stories-list-grid" id="storiesListGrid"></div>
+</div>
+
+<!-- STORY READER -->
+<div id="story-reader" class="page">
+  <div style="background:var(--sepia-deep);padding:16px 24px;">
+    <span class="heritage-breadcrumb" onclick="showPage('stories-page')" style="color:var(--sepia-light);">
+      <i class="fa fa-arrow-left"></i> Back to Stories
+    </span>
+  </div>
+  <div class="story-reader" id="storyReaderContent"></div>
+</div>
+
+<!-- PASSPORT PAGE -->
+<div id="passport" class="page">
+  <div class="passport-book">
+    <!-- Heritage Passport Card -->
+    <div class="lanyard-passport-section" style="padding:24px;background:linear-gradient(180deg,#0D0502,#1A0A04);border-radius:16px;overflow:hidden;">
+      <div class="lanyard-id-card" id="lanyardStaticCard" style="margin:0 auto;cursor:default;user-select:none;">
+        <div class="lanyard-card-logo-row">
+          <div class="lanyard-card-logo-text">CalKotha</div>
+          <div class="lanyard-card-year-badge">2026</div>
+        </div>
+        <div class="lanyard-card-photo">
+          <span id="passportCardAvatar" style="font-size:48px;line-height:1;">👤</span>
+        </div>
+        <div class="lanyard-card-name-text" id="passportCardName">Explorer</div>
+        <div class="lanyard-card-role-text">Heritage Explorer</div>
+        <div class="lanyard-card-divider"></div>
+        <div class="lanyard-card-stats-row">
+          <div class="lanyard-card-stat"><div class="lanyard-card-stat-num" id="passportCardXp">0</div><div class="lanyard-card-stat-lbl">XP</div></div>
+          <div class="lanyard-card-stat"><div class="lanyard-card-stat-num" id="passportCardLvl">LVL 1</div><div class="lanyard-card-stat-lbl">Level</div></div>
+          <div class="lanyard-card-stat"><div class="lanyard-card-stat-num" id="passportCardStamps">0</div><div class="lanyard-card-stat-lbl">Stamps</div></div>
+        </div>
+        <div class="lanyard-card-barcode"></div>
+      </div>
+    </div>
+
+    <div class="passport-cover">
+      <div class="passport-emblem">🏛️</div>
+      <div class="passport-country">Republic of Heritage Explorers</div>
+      <div class="passport-title">CalKotha</div>
+      <div class="passport-subtitle">Heritage Explorer's Passport</div>
+      <div class="passport-holder">
+        <div class="passport-avatar" id="passportAvatarDisp">👤</div>
+        <div style="flex:1;">
+          <div class="passport-holder-name" id="passportName">Explorer</div>
+          <div class="passport-holder-meta" id="passportMeta">Heritage Explorer · Member since 2026</div>
+          <div class="passport-level-wrap">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;">
+              <span style="font-family:var(--font-special);font-size:10px;letter-spacing:1px;color:var(--tram-gold);">LEVEL <span id="passportLevel">1</span></span>
+              <span style="font-family:var(--font-special);font-size:10px;color:var(--sepia-light);" id="passportLevelXP">0 / 500 XP</span>
+            </div>
+            <div style="background:rgba(0,0,0,0.3);border-radius:20px;height:6px;overflow:hidden;">
+              <div id="passportLevelBar" style="height:100%;border-radius:20px;background:linear-gradient(90deg,var(--tram-gold),var(--tram-red));width:0%;transition:width 0.8s ease;"></div>
+            </div>
+          </div>
+          <div class="passport-holder-stats">
+            <div class="passport-stat"><div class="passport-stat-num" id="passportStamps">0</div><div class="passport-stat-label">Stamps</div></div>
+            <div class="passport-stat"><div class="passport-stat-num" id="passportXP">0</div><div class="passport-stat-label">XP</div></div>
+            <div class="passport-stat"><div class="passport-stat-num" id="passportVisited">0</div><div class="passport-stat-label">Visited</div></div>
+          </div>
+        </div>
+      </div>
+      <div style="margin-top:16px;">
+        <button class="btn btn-gold btn-sm" onclick="showPage('stamp-binder')" style="width:100%;justify-content:center;"><i class="fa fa-book"></i> Open Stamp Binder</button>
+      </div>
+    </div>
+
+    <div class="card" style="margin-bottom:24px;">
+      <div style="font-family:var(--font-display);font-size:18px;font-weight:700;margin-bottom:16px;">Exploration Progress</div>
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;">
+        <span style="font-size:13px;color:var(--sepia-mid);">Kolkata Heritage</span>
+        <span style="font-family:var(--font-special);font-size:11px;color:var(--tram-gold);" id="progressPct">0%</span>
+      </div>
+      <div class="progress-bar-wrap"><div class="progress-bar-fill" id="progressBar" style="width:0%"></div></div>
+      <div style="font-size:12px;color:var(--sepia-mid);margin-top:8px;" id="progressDesc">Visit more locations to increase your exploration percentage</div>
+    </div>
+
+    <h3 style="font-family:var(--font-display);font-size:22px;font-weight:700;margin-bottom:20px;">Stamp Collection</h3>
+    <div class="passport-pages" id="stampPages"></div>
+  </div>
+</div>
+
+<!-- SEARCH PAGE -->
+<div id="search-page" class="page">
+  <div class="search-hero">
+    <div class="section-label" style="color:var(--sepia-light);margin-bottom:12px;">Heritage Discovery</div>
+    <h2 class="section-title" style="color:var(--tram-gold);margin-bottom:24px;">Search Kolkata</h2>
+    <div style="position:relative;max-width:600px;margin:0 auto;">
+      <div class="search-input-wrap">
+        <i class="fa fa-search search-input-icon"></i>
+        <input type="text" id="searchInput" placeholder="Search locations, stories, architecture..." oninput="performSearch(this.value)">
+      </div>
+      <div class="search-suggestion" id="searchSuggestions" style="display:none;"></div>
+    </div>
+    <div class="search-filters" style="margin-top:20px;">
+      <button class="filter-chip active" onclick="setSearchFilter('all', this)">All</button>
+      <button class="filter-chip" onclick="setSearchFilter('colonial', this)">Colonial</button>
+      <button class="filter-chip" onclick="setSearchFilter('religious', this)">Religious</button>
+      <button class="filter-chip" onclick="setSearchFilter('cultural', this)">Cultural</button>
+      <button class="filter-chip" onclick="setSearchFilter('educational', this)">Educational</button>
+      <button class="filter-chip" onclick="setSearchFilter('hidden', this)">Hidden Gems</button>
+    </div>
+  </div>
+  <div class="search-results">
+    <div class="search-results-count" id="searchCount">Showing all heritage locations</div>
+    <div class="search-results-grid" id="searchResultsGrid"></div>
+  </div>
+</div>
+
+<!-- FAVORITES PAGE -->
+<div id="favorites" class="page">
+  <section class="search-hero">
+    <h2 class="section-title" style="color:var(--tram-gold);">My Favorites</h2>
+    <p class="section-desc">Your saved locations, stories, and routes</p>
+  </section>
+  <div class="favorites-body">
+    <div class="favorites-tabs">
+      <span class="favorites-tab active" onclick="setFavTab('locations', this)">Locations</span>
+      <span class="favorites-tab" onclick="setFavTab('stories', this)">Stories</span>
+      <span class="favorites-tab" onclick="setFavTab('routes', this)">Routes</span>
+    </div>
+    <div id="favoritesContent"></div>
+  </div>
+</div>
+
+<!-- SETTINGS PAGE -->
+<div id="settings-page" class="page">
+  <section class="search-hero">
+    <h2 class="section-title" style="color:var(--tram-gold);">Settings & Profile</h2>
+    <p class="section-desc">Customize your CalKotha experience</p>
+  </section>
+  <div class="settings-body">
+    <div class="settings-section">
+      <div class="settings-section-title">Explorer Profile</div>
+      <div id="profileCardPreview" style="background:linear-gradient(135deg,rgba(201,162,39,0.1),rgba(139,26,26,0.08));border:1px solid rgba(201,162,39,0.3);border-radius:6px;padding:20px;margin-bottom:20px;display:flex;align-items:center;gap:16px;">
+        <div id="profileAvatarDisplay" style="width:64px;height:64px;border-radius:50%;background:var(--sepia-deep);border:2px solid var(--tram-gold);display:flex;align-items:center;justify-content:center;font-size:28px;flex-shrink:0;">👤</div>
+        <div>
+          <div id="profileDisplayName" style="font-family:var(--font-display);font-size:20px;font-weight:700;color:var(--sepia-deep);">Explorer</div>
+          <div id="profileDisplayBio" style="font-size:13px;color:var(--sepia-mid);margin-top:2px;font-style:italic;">No bio yet</div>
+          <div id="profileDisplayBadge" style="font-size:11px;color:var(--tram-gold);margin-top:4px;font-family:var(--font-special);letter-spacing:1px;">Heritage Novice</div>
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Explorer Name</label>
+        <input type="text" class="form-input" id="profileName" placeholder="Enter your name" oninput="document.getElementById('profileDisplayName').textContent=this.value||'Explorer'">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Avatar</label>
+        <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:8px;" id="avatarPicker">
+          <span class="avatar-pick" onclick="selectAvatar('🧭')" style="font-size:28px;cursor:pointer;padding:4px;border-radius:6px;border:2px solid transparent;">🧭</span>
+          <span class="avatar-pick" onclick="selectAvatar('🏛️')" style="font-size:28px;cursor:pointer;padding:4px;border-radius:6px;border:2px solid transparent;">🏛️</span>
+          <span class="avatar-pick" onclick="selectAvatar('📚')" style="font-size:28px;cursor:pointer;padding:4px;border-radius:6px;border:2px solid transparent;">📚</span>
+          <span class="avatar-pick" onclick="selectAvatar('🎓')" style="font-size:28px;cursor:pointer;padding:4px;border-radius:6px;border:2px solid transparent;">🎓</span>
+          <span class="avatar-pick" onclick="selectAvatar('🔭')" style="font-size:28px;cursor:pointer;padding:4px;border-radius:6px;border:2px solid transparent;">🔭</span>
+          <span class="avatar-pick" onclick="selectAvatar('🚃')" style="font-size:28px;cursor:pointer;padding:4px;border-radius:6px;border:2px solid transparent;">🚃</span>
+          <span class="avatar-pick" onclick="selectAvatar('🌟')" style="font-size:28px;cursor:pointer;padding:4px;border-radius:6px;border:2px solid transparent;">🌟</span>
+          <span class="avatar-pick" onclick="selectAvatar('🗺️')" style="font-size:28px;cursor:pointer;padding:4px;border-radius:6px;border:2px solid transparent;">🗺️</span>
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Explorer Bio</label>
+        <textarea class="form-input" id="profileBio" rows="3" placeholder="Tell fellow explorers about yourself..." oninput="document.getElementById('profileDisplayBio').textContent=this.value||'No bio yet'"></textarea>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Explorer Title</label>
+        <select class="form-input" id="profileTitle" onchange="document.getElementById('profileDisplayBadge').textContent=this.value">
+          <option value="Heritage Novice">Heritage Novice</option>
+          <option value="Kolkata Explorer">Kolkata Explorer</option>
+          <option value="History Enthusiast">History Enthusiast</option>
+          <option value="Tram Rider">Tram Rider</option>
+          <option value="Hidden Gem Hunter">Hidden Gem Hunter</option>
+          <option value="CalKotha Legend">CalKotha Legend</option>
+        </select>
+      </div>
+      <button class="btn btn-primary" onclick="saveProfile()"><i class="fa fa-save"></i> Save Profile</button>
+    </div>
+    <div class="settings-section">
+      <div class="settings-section-title">Notifications</div>
+      <div class="settings-row">
+        <div class="settings-row-info"><div class="settings-row-label">Nearby Heritage</div><div class="settings-row-desc">Alert when within 200m of a heritage site</div></div>
+        <div class="toggle on" id="toggleNearby" onclick="toggleSetting('nearby', this)"></div>
+      </div>
+      <div class="settings-row">
+        <div class="settings-row-info"><div class="settings-row-label">GPS Stamp Unlock</div><div class="settings-row-desc">Auto-collect stamps when visiting sites</div></div>
+        <div class="toggle on" id="toggleGPS" onclick="toggleSetting('gps', this)"></div>
+      </div>
+    </div>
+    <div class="settings-section">
+      <div class="settings-section-title">Data & Privacy</div>
+      <button class="btn btn-ghost" onclick="clearAllData()" style="color:var(--tram-red);border-color:rgba(139,26,26,0.3);"><i class="fa fa-trash"></i> Clear All Data</button>
+    </div>
+  </div>
+</div>
+
+<!-- TRAM HERITAGE PAGE -->
+<div id="tram-page" class="page">
+  <div class="dev-caution-banner" id="devCautionTram">
+    <div class="dev-caution-icon">🚃</div>
+    <div class="dev-caution-text"><strong>Tram Network Note:</strong> All tram route data is based on real Kolkata tram operations as of 2024. Live tracking and real-time schedules require CSTC API integration (production roadmap).</div>
+    <button onclick="document.getElementById('devCautionTram').style.display='none'" class="dev-caution-close">✕</button>
+  </div>
+  <div class="missions-header">
+    <div class="section-label" style="color:var(--sepia-light);">Kolkata Heritage Transport</div>
+    <h2 class="section-title" style="color:var(--tram-gold);">🚃 Tram Explorer</h2>
+    <p class="section-desc" style="color:var(--sepia-pale);">Journey through Kolkata's living heritage aboard Asia's oldest electric tram network</p>
+  </div>
+  <div class="tram-tabs">
+    <span class="tram-tab active" onclick="setTramTab('routes',this)">Routes</span>
+    <span class="tram-tab" onclick="setTramTab('stations',this)">Stations</span>
+    <span class="tram-tab" onclick="setTramTab('planner',this)">Planner</span>
+    <span class="tram-tab" onclick="setTramTab('stories',this)">Tram Stories</span>
+  </div>
+  <div id="tramContent" style="padding:32px 40px;max-width:1200px;margin:0 auto;"></div>
+</div>
+
+<!-- AI GUIDE PAGE -->
+<div id="ai-guide-page" class="page">
+  <div style="background:linear-gradient(135deg,var(--sepia-deep),#0D0502);padding:20px 24px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid rgba(201,162,39,0.2);">
+    <span class="heritage-breadcrumb" onclick="goBack()" style="color:var(--sepia-light);"><i class="fa fa-arrow-left"></i> Back</span>
+    <div style="text-align:center;">
+      <div style="font-family:var(--font-special);font-size:11px;letter-spacing:3px;color:var(--tram-gold);">CALKOTHA</div>
+      <div style="font-family:var(--font-display);font-size:16px;font-weight:700;color:var(--sepia-cream);">AI Heritage Guide</div>
+    </div>
+    <div style="width:60px;"></div>
+  </div>
+  <div class="ai-guide-container">
+    <div class="ai-guide-hero">
+      <div class="ai-guide-avatar"><i class="fa fa-robot"></i><div class="ai-guide-avatar-ring"></div></div>
+      <div>
+        <h2 class="ai-guide-title">CalKotha AI Guide</h2>
+        <p class="ai-guide-subtitle">Your personal guide to Kolkata's heritage, stories, routes, and history</p>
+      </div>
+    </div>
+    <div class="dev-caution-inline" style="margin-bottom:16px;">🤖 <strong>AI Note:</strong> Powered by Claude (Anthropic). Requires API key for full functionality. In demo mode, responses are AI-generated heritage knowledge — no external API calls in this build.</div>
+    <div class="ai-guide-chips" id="aiGuideChips">
+      <button class="ai-chip" onclick="sendAIPrompt('Tell me the history of Howrah Bridge')">🌉 Howrah Bridge history</button>
+      <button class="ai-chip" onclick="sendAIPrompt('Suggest a 3-hour heritage walk in North Kolkata')">🗺️ Heritage walk route</button>
+      <button class="ai-chip" onclick="sendAIPrompt('What is special about Durga Puja in Kolkata?')">🎭 Durga Puja</button>
+      <button class="ai-chip" onclick="sendAIPrompt('Who was Rabindranath Tagore?')">✍️ Tagore & Kolkata</button>
+      <button class="ai-chip" onclick="sendAIPrompt('Tell me about Kolkata\'s tram history')">🚃 Tram history</button>
+      <button class="ai-chip" onclick="sendAIPrompt('What are the hidden gems of Kolkata?')">💎 Hidden gems</button>
+    </div>
+    <div class="ai-guide-messages" id="aiGuideMessages">
+      <div class="ai-msg ai-msg-assistant">
+        <div class="ai-msg-avatar"><i class="fa fa-robot"></i></div>
+        <div class="ai-msg-bubble">
+          <p>Namaskar! I am your <strong>CalKotha AI Heritage Guide</strong>. 🏛️</p>
+          <p style="margin-top:8px;">I know everything about Kolkata — its colonial history, sacred temples, tram routes, hidden alleys, legendary people, and living traditions.</p>
+          <p style="margin-top:8px;font-style:italic;color:var(--sepia-mid);">কলকাতার গল্প বলুন — Tell me your Kolkata story.</p>
+        </div>
+      </div>
+    </div>
+    <div class="ai-guide-input-area">
+      <div class="ai-guide-input-wrap">
+        <textarea id="aiGuideInput" class="ai-guide-input" placeholder="Ask about heritage sites, routes, history, culture..." rows="1"
+          onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendAIMessage();}"
+          oninput="this.style.height='auto';this.style.height=Math.min(this.scrollHeight,120)+'px';"></textarea>
+        <button class="ai-guide-send" id="aiGuideSendBtn" onclick="sendAIMessage()" title="Send"><i class="fa fa-paper-plane"></i></button>
+      </div>
+      <div class="ai-guide-powered"><i class="fa fa-bolt"></i> Powered by Claude AI · Specialised in Kolkata Heritage</div>
+    </div>
+  </div>
+</div>
+
+<!-- STAMP BINDER PAGE -->
+<div id="stamp-binder" class="page">
+  <div class="stamp-binder-header">
+    <div style="display:flex;align-items:center;gap:12px;">
+      <span class="heritage-breadcrumb" onclick="goBack()" style="color:var(--sepia-light);"><i class="fa fa-arrow-left"></i></span>
+      <div>
+        <div class="section-label" style="color:var(--sepia-light);margin:0;">Heritage Collection</div>
+        <h2 style="font-family:var(--font-display);font-size:clamp(20px,4vw,32px);font-weight:900;color:var(--tram-gold);margin:0;">Stamp Binder</h2>
+      </div>
+    </div>
+    <div class="stamp-binder-stats">
+      <div class="stamp-binder-stat"><div class="sbstat-num" id="binderTotal">0</div><div class="sbstat-label">Collected</div></div>
+      <div class="stamp-binder-stat"><div class="sbstat-num" id="binderRare">0</div><div class="sbstat-label">Rare+</div></div>
+      <div class="stamp-binder-stat"><div class="sbstat-num" id="binderXP">0</div><div class="sbstat-label">Binder XP</div></div>
+    </div>
+  </div>
+  <div class="dev-caution-inline" style="margin:0 20px 16px;">📍 <strong>GPS Stamps:</strong> Stamps are earned by physically visiting heritage sites. When within 200m of a site, tap the map marker to collect. Demo: Use "Collect Stamp" buttons on site detail pages.</div>
+  <div class="stamp-binder-toolbar">
+    <div class="stamp-binder-filters">
+      <button class="sbfilter active" onclick="setBinderFilter('all',this)">All</button>
+      <button class="sbfilter" onclick="setBinderFilter('common',this)">Common</button>
+      <button class="sbfilter rarity-rare" onclick="setBinderFilter('rare',this)">Rare</button>
+      <button class="sbfilter rarity-epic" onclick="setBinderFilter('epic',this)">Epic</button>
+      <button class="sbfilter rarity-legendary" onclick="setBinderFilter('legendary',this)">Legendary</button>
+      <button class="sbfilter" onclick="setBinderFilter('locked',this)">🔒 Locked</button>
+    </div>
+    <div class="stamp-binder-sort">
+      <select class="form-input" id="binderSort" onchange="renderStampBinder()" style="font-size:12px;padding:6px 12px;">
+        <option value="rarity">Sort: Rarity</option>
+        <option value="name">Sort: Name</option>
+        <option value="xp">Sort: XP Value</option>
+        <option value="date">Sort: Visit Date</option>
+      </select>
+    </div>
+  </div>
+  <div class="stamp-binder-grid" id="stampBinderGrid"></div>
+  <div class="stamp-card-modal-overlay" id="stampCardModal" onclick="closeStampCardModal(event)" style="display:none;">
+    <div class="stamp-card-modal" id="stampCardModalContent"></div>
+  </div>
+</div>
+
+<!-- AR PAGE -->
+<div id="ar-page" class="page">
+  <div style="background:var(--sepia-deep);padding:16px 24px;display:flex;align-items:center;justify-content:space-between;">
+    <span class="heritage-breadcrumb" onclick="goBack()" style="color:var(--sepia-light);"><i class="fa fa-arrow-left"></i> Back</span>
+    <span style="font-family:var(--font-special);font-size:11px;letter-spacing:2px;color:var(--tram-gold);">AR TIME TRAVEL</span>
+  </div>
+  <div class="ar-container">
+    <div class="ar-hero" style="padding-top:24px;">
+      <div class="ar-hero-icon">🔭</div>
+      <h2 style="font-family:var(--font-display);font-size:clamp(28px,5vw,48px);font-weight:900;color:var(--tram-gold);margin-bottom:12px;">AR Time Travel</h2>
+      <p style="font-family:var(--font-fell);font-style:italic;font-size:16px;color:var(--sepia-pale);max-width:520px;margin:0 auto 32px;">Point your camera at any heritage site and watch Kolkata reveal its historical layers</p>
+    </div>
+    <div class="ar-camera-wrap" id="arCameraWrap">
+      <div class="ar-camera-frame" id="arCameraFrame">
+        <!-- Real camera video injected here by JS -->
+        <div class="ar-scanline"></div>
+        <div class="ar-corners">
+          <div class="ar-corner tl"></div><div class="ar-corner tr"></div>
+          <div class="ar-corner bl"></div><div class="ar-corner br"></div>
+        </div>
+        <div class="ar-camera-label" id="arCameraLabel">POINT CAMERA · SELECT SITE BELOW</div>
+        <div class="ar-overlay-content" id="arOverlayContent"></div>
+        <div class="ar-scan-progress" id="arScanProgress" style="display:none;">
+          <div class="ar-scan-bar" id="arScanBar"></div>
+          <div class="ar-scan-text" id="arScanText">Scanning heritage site...</div>
+        </div>
+      </div>
+      <div class="ar-controls">
+        <button class="ar-ctrl-btn" onclick="arCapture()" id="arCaptureBtn"><i class="fa fa-camera"></i> Scan Site</button>
+        <button class="ar-ctrl-btn ar-ctrl-secondary" onclick="arToggleOverlay()"><i class="fa fa-layer-group"></i> Toggle Era</button>
+        <button class="ar-ctrl-btn ar-ctrl-secondary" onclick="arBeforeAfter()"><i class="fa fa-columns"></i> Before/After</button>
+      </div>
+    </div>
+    <div style="margin-top:32px;">
+      <div style="font-family:var(--font-special);font-size:11px;letter-spacing:3px;text-transform:uppercase;color:var(--tram-gold);text-align:center;margin-bottom:20px;">SELECT HERITAGE SITE TO EXPLORE IN AR</div>
+      <div class="ar-site-grid" id="arSiteGrid"></div>
+    </div>
+    <div class="ar-verify-section">
+      <div style="font-family:var(--font-display);font-size:22px;font-weight:700;margin-bottom:8px;">AI Verification System</div>
+      <p style="font-size:14px;color:var(--sepia-mid);margin-bottom:20px;">After scanning a site, our AI compares your capture with the heritage database and generates a verification score.</p>
+      <div class="ar-verify-result" id="arVerifyResult" style="display:none;">
+        <div class="ar-verify-score" id="arVerifyScore">--</div>
+        <div class="ar-verify-label">Heritage Match Score</div>
+        <div id="arVerifyRewards" style="margin-top:16px;"></div>
+      </div>
+      <div id="arVerifyEmpty" style="text-align:center;padding:20px;">
+        <div style="font-size:40px;margin-bottom:12px;">📡</div>
+        <div style="font-size:14px;color:var(--sepia-mid);">Scan a heritage site above to verify and earn stamps</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- COMMUNITY PAGE -->
+<div id="community-page" class="page">
+  <section class="search-hero">
+    <div class="section-label" style="color:var(--sepia-light);">CalKotha Community</div>
+    <h2 class="section-title" style="color:var(--tram-gold);">Heritage Explorers Network</h2>
+    <p class="section-desc">Join hundreds of passionate heritage explorers preserving Kolkata's living memory</p>
+  </section>
+  <div style="max-width:1100px;margin:0 auto;padding:40px 24px;">
+    <div class="community-stats-row">
+      <div class="community-stat-card"><div class="community-stat-num">1,240+</div><div class="community-stat-label">Active Explorers</div></div>
+      <div class="community-stat-card"><div class="community-stat-num">380+</div><div class="community-stat-label">Landmarks Submitted</div></div>
+      <div class="community-stat-card"><div class="community-stat-num">92</div><div class="community-stat-label">Heritage Stories</div></div>
+      <div class="community-stat-card"><div class="community-stat-num">18</div><div class="community-stat-label">Active Routes</div></div>
+    </div>
+    <div style="margin-top:48px;">
+      <div class="section-header"><div class="section-label">Heritage Champions</div><h3 class="section-title">Top Contributors</h3></div>
+      <div class="contributors-grid" id="contributorsGrid"></div>
+    </div>
+    <div style="margin-top:48px;">
+      <div class="section-header"><div class="section-label">Get Involved</div><h3 class="section-title">How to Participate</h3></div>
+      <div class="participation-grid">
+        <div class="participation-card"><div class="participation-icon">📍</div><div class="participation-title">Submit Landmarks</div><p class="participation-desc">Found a forgotten heritage site? Submit it and earn a Heritage Scout badge. Each approved submission: 200 XP.</p><button class="btn btn-primary btn-sm" onclick="showPage('landmark-submit')">Submit Landmark</button></div>
+        <div class="participation-card"><div class="participation-icon">📖</div><div class="participation-title">Write Stories</div><p class="participation-desc">Share your family connection to Kolkata's history and contribute to the city's living memory.</p><button class="btn btn-ghost btn-sm" onclick="showPage('contact-page')">Get in Touch</button></div>
+        <div class="participation-card"><div class="participation-icon">🔭</div><div class="participation-title">AR Contributions</div><p class="participation-desc">Help build our AR heritage database by capturing and verifying historical sites.</p><button class="btn btn-ghost btn-sm" onclick="showPage('ar-page')">Start Verifying</button></div>
+        <div class="participation-card"><div class="participation-icon">🚃</div><div class="participation-title">Tram Heritage Records</div><p class="participation-desc">Document old tram routes and photograph heritage tram stops.</p><button class="btn btn-ghost btn-sm" onclick="showPage('tram-page')">Explore Trams</button></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- CONTACT PAGE -->
+<div id="contact-page" class="page">
+  <section class="search-hero">
+    <div class="section-label" style="color:var(--sepia-light);">Get in Touch</div>
+    <h2 class="section-title" style="color:var(--tram-gold);">Contact CalKotha</h2>
+    <p class="section-desc">We'd love to hear from heritage explorers, contributors, and collaborators</p>
+  </section>
+  <div style="max-width:900px;margin:0 auto;padding:40px 24px;display:grid;grid-template-columns:1fr 1fr;gap:40px;" class="contact-grid">
+    <div>
+      <div style="font-family:var(--font-display);font-size:26px;font-weight:700;margin-bottom:24px;">Reach Us Directly</div>
+      <div class="contact-info-row"><div class="contact-info-icon"><i class="fa fa-envelope"></i></div><div><div class="contact-info-label">Email</div><div class="contact-info-value"><a href="mailto:biswas.12tuhin@gmail.com" style="color:var(--tram-gold);">biswas.12tuhin@gmail.com</a></div></div></div>
+      <div class="contact-info-row"><div class="contact-info-icon"><i class="fa fa-phone"></i></div><div><div class="contact-info-label">Phone</div><div class="contact-info-value"><a href="tel:7003441334" style="color:var(--tram-gold);">7003441334</a></div></div></div>
+      <div class="contact-info-row"><div class="contact-info-icon"><i class="fa fa-map-marker-alt"></i></div><div><div class="contact-info-label">Based in</div><div class="contact-info-value">Kolkata, West Bengal, India</div></div></div>
+    </div>
+    <div>
+      <div style="font-family:var(--font-display);font-size:26px;font-weight:700;margin-bottom:24px;">Send a Message</div>
+      <div class="form-group"><label class="form-label">Your Name</label><input type="text" class="form-input" id="contactName" placeholder="Explorer name"></div>
+      <div class="form-group"><label class="form-label">Email</label><input type="email" class="form-input" id="contactEmail" placeholder="your@email.com"></div>
+      <div class="form-group"><label class="form-label">Message</label><textarea class="form-input" id="contactMessage" rows="5" placeholder="Your message..."></textarea></div>
+      <button class="btn btn-primary" style="width:100%;justify-content:center;" onclick="submitContact()"><i class="fa fa-paper-plane"></i> Send Message</button>
+    </div>
+  </div>
+</div>
+
+<!-- LANDMARK SUBMIT -->
+<div id="landmark-submit" class="page">
+  <div style="background:var(--sepia-deep);padding:16px 24px;">
+    <span class="heritage-breadcrumb" onclick="goBack()" style="color:var(--sepia-light);"><i class="fa fa-arrow-left"></i> Back</span>
+  </div>
+  <div class="landmark-submit-area">
+    <div class="section-header" style="text-align:left;margin-bottom:32px;">
+      <div class="section-label">Community</div>
+      <h2 class="section-title">Add Hidden Landmark</h2>
+      <p class="section-desc" style="text-align:left;margin:0;">Help expand CalKotha's heritage database by submitting undocumented locations.</p>
+    </div>
+    <div class="dev-caution-inline" style="margin-bottom:20px;">📍 <strong>Dev Note:</strong> Submissions are stored in localStorage in this prototype. Production: Supabase database with moderation queue and admin review panel.</div>
+    <div class="form-group"><label class="form-label">Landmark Name *</label><input type="text" class="form-input" id="lmName" placeholder="What is this place called?"></div>
+    <div class="form-group"><label class="form-label">Historical Description *</label><textarea class="form-input" id="lmDesc" rows="4" placeholder="What makes this location historically significant?"></textarea></div>
+    <div class="form-group"><label class="form-label">Category</label><select class="form-input" id="lmCat"><option value="">Select category...</option><option value="colonial">Colonial</option><option value="religious">Religious</option><option value="cultural">Cultural</option><option value="educational">Educational</option><option value="hidden">Hidden Gem</option></select></div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
+      <div class="form-group"><label class="form-label">Latitude</label><input type="text" class="form-input" id="lmLat" placeholder="e.g. 22.5726"></div>
+      <div class="form-group"><label class="form-label">Longitude</label><input type="text" class="form-input" id="lmLng" placeholder="e.g. 88.3639"></div>
+    </div>
+    <button class="btn btn-primary btn-lg" onclick="submitLandmark()" style="width:100%;justify-content:center;"><i class="fa fa-paper-plane"></i> Submit for Review</button>
+  </div>
+</div>
+
+<!-- MODALS -->
+<div class="modal-overlay" id="onboardingModal">
+  <div class="modal">
+    <div class="modal-header"><span class="modal-title">Create Your Passport</span><button class="modal-close" onclick="closeModal('onboardingModal')">✕</button></div>
+    <div class="modal-body">
+      <p style="font-family:var(--font-fell);font-style:italic;font-size:16px;color:var(--sepia-mid);margin-bottom:24px;">"Every great explorer begins with a name and a dream."</p>
+      <div class="form-group"><label class="form-label">Your Explorer Name</label><input type="text" class="form-input" id="onboardName" placeholder="What shall we call you, explorer?"></div>
+      <div class="form-group"><label class="form-label">What brings you to CalKotha?</label>
+        <select class="form-input" id="onboardInterest">
+          <option value="">Select your interest...</option>
+          <option value="history">I love Kolkata's history</option>
+          <option value="architecture">Architecture & design</option>
+          <option value="stories">Untold stories & mysteries</option>
+          <option value="travel">I'm visiting Kolkata</option>
+          <option value="heritage">Preserving heritage</option>
+        </select>
+      </div>
+      <button class="btn btn-primary btn-lg" onclick="createPassport()" style="width:100%;justify-content:center;margin-top:8px;"><i class="fa fa-passport"></i> Begin My Journey</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="aiRouteModal">
+  <div class="modal" style="max-width:520px;">
+    <div class="modal-header"><span class="modal-title"><i class="fa fa-robot"></i> AI Route Generator</span><button class="modal-close" onclick="closeModal('aiRouteModal')">✕</button></div>
+    <div class="modal-body">
+      <div class="form-group"><label class="form-label">Your Interests</label><select class="form-input" id="aiInterestModal"><option value="history">Colonial History</option><option value="culture">Culture & Art</option><option value="religion">Sacred Sites</option><option value="hidden">Hidden Gems</option><option value="education">Educational</option></select></div>
+      <div class="form-group"><label class="form-label">Available Time</label><select class="form-input" id="aiTimeModal"><option value="2">2 Hours</option><option value="4">Half Day (4 hrs)</option><option value="8">Full Day (8 hrs)</option></select></div>
+      <div class="form-group"><label class="form-label">Transport</label><select class="form-input" id="aiTransportModal"><option value="tram">Tram + Walking</option><option value="walking">Walking Only</option><option value="mixed">Mixed</option></select></div>
+      <button class="btn btn-primary btn-lg" style="width:100%;justify-content:center;" onclick="generateAIRouteModal()"><i class="fa fa-magic"></i> Generate My Route</button>
+      <div id="aiRouteModalResult" style="margin-top:20px;"></div>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="mainToast"></div>
+
+<!-- ACHIEVEMENT BANNER -->
+<div class="achievement-unlock-banner" id="achievementBanner">
+  <div class="achievement-banner-icon" id="achievementBannerIcon">🏆</div>
+  <div>
+    <div class="achievement-banner-title">Stamp Unlocked!</div>
+    <div class="achievement-banner-name" id="achievementBannerName">First Explorer</div>
+  </div>
+</div>
+
+<!-- BACK TO TOP -->
+<button class="back-top" id="backTop" onclick="window.scrollTo({top:0,behavior:'smooth'})"><i class="fa fa-arrow-up"></i></button>
+
+<!-- DOCK NAVIGATION (bottom, replaces old nav) -->
+<nav class="dock-nav" id="dockNav">
+  <div class="dock-outer">
+    <div class="dock-panel" id="dockPanel"
+      onmousemove="dockMouseMove(event)"
+      onmouseleave="dockMouseLeave()">
+      <div class="dock-item" onclick="showPage('home')" data-label="Home" title="Home">
+        <div class="dock-icon"><i class="fa fa-home"></i></div>
+        <div class="dock-label">Home</div>
+      </div>
+      <div class="dock-item" onclick="showPage('map-page')" data-label="Map" title="Map">
+        <div class="dock-icon"><i class="fa fa-map-marked-alt"></i></div>
+        <div class="dock-label">Map</div>
+      </div>
+      <div class="dock-item" onclick="showPage('tram-page')" data-label="Tram" title="Tram">
+        <div class="dock-icon" style="font-size:18px;">🚃</div>
+        <div class="dock-label">Tram</div>
+      </div>
+      <div class="dock-item" onclick="showPage('stamp-binder')" data-label="Stamps" title="Stamps">
+        <div class="dock-icon" style="font-size:18px;">📮</div>
+        <div class="dock-label">Stamps</div>
+      </div>
+      <div class="dock-item" onclick="showPage('passport')" data-label="Passport" title="Passport">
+        <div class="dock-icon"><i class="fa fa-passport"></i></div>
+        <div class="dock-label">Passport</div>
+      </div>
+      <div class="dock-item" onclick="showPage('ai-guide-page')" data-label="AI Guide" title="AI Guide">
+        <div class="dock-icon"><i class="fa fa-robot"></i></div>
+        <div class="dock-label">AI Guide</div>
+      </div>
+      <div class="dock-item" onclick="showPage('settings-page')" data-label="Settings" title="Settings">
+        <div class="dock-icon"><i class="fa fa-cog"></i></div>
+        <div class="dock-label">Settings</div>
+      </div>
+      <div class="dock-item" onclick="showPage('community-page')" data-label="Community" title="Community">
+        <div class="dock-icon"><i class="fa fa-users"></i></div>
+        <div class="dock-label">Community</div>
+      </div>
+    </div>
+  </div>
+</nav>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="script.js"></script>
+<div id="mainNav" style="display:none;"></div>
+<div id="gpsStampNotif" style="position:fixed;top:70px;left:50%;transform:translateX(-50%) translateY(-30px);z-index:9900;opacity:0;pointer-events:none;border-radius:14px;padding:18px 28px;text-align:center;min-width:260px;"></div>
+<div id="protoBanner"></div>
+</body>
+</html>
