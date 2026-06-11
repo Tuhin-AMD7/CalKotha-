@@ -2432,24 +2432,27 @@ ul, ol { list-style: none; }
   z-index: 4000;
   display: flex;
   justify-content: center;
+  align-items: flex-end;
   pointer-events: none;
-  padding-bottom: 8px;
+  padding-bottom: max(env(safe-area-inset-bottom, 0px), 8px);
+  box-sizing: border-box;
 }
 .dock-outer {
   pointer-events: auto;
   position: relative;
   display: flex;
   align-items: flex-end;
-  height: 80px;
-  margin: 0 0.5rem;
+  margin: 0 0.5rem 0.5rem;
+  max-width: calc(100vw - 16px);
+  min-width: 0;
 }
 .dock-panel {
   position: relative;
   bottom: 0;
   display: flex;
-  align-items: flex-end;
-  gap: 8px;
-  padding: 0 12px 10px;
+  align-items: center;
+  gap: clamp(2px, 1.5vw, 8px);
+  padding: 8px clamp(6px, 2vw, 12px) 10px;
   border-radius: 18px;
   background: rgba(18, 10, 6, 0.88);
   backdrop-filter: blur(20px) saturate(1.6);
@@ -2457,6 +2460,10 @@ ul, ol { list-style: none; }
   border: 1px solid rgba(201,162,39,0.25);
   box-shadow: 0 -2px 40px rgba(0,0,0,0.5), 0 0 0 0.5px rgba(255,255,255,0.05);
   transition: transform 0.3s ease;
+  max-width: calc(100vw - 16px);
+  box-sizing: border-box;
+  flex-wrap: nowrap;
+  overflow: visible;
 }
 .dock-item {
   position: relative;
@@ -3011,14 +3018,13 @@ ul, ol { list-style: none; }
 
 /* ─── RESPONSIVE DOCK ─────────────────────────────────────── */
 @media (max-width: 600px) {
-  .dock-panel { gap: 4px; padding: 0 8px 8px; }
-  .dock-item { width: 42px; height: 42px; }
-  .dock-icon { font-size: 16px; }
+  .dock-panel { gap: clamp(2px, 1.2vw, 4px); padding: 6px clamp(4px, 1.5vw, 8px) 8px; }
+  .dock-item { width: clamp(32px, 8.5vw, 42px); height: clamp(32px, 8.5vw, 42px); }
 }
 @media (max-width: 400px) {
-  .dock-item { width: 36px; height: 36px; }
-  .dock-icon { font-size: 14px; }
-  .dock-panel { gap: 2px; padding: 0 4px 6px; }
+  .dock-item { width: clamp(30px, 8vw, 36px); height: clamp(30px, 8vw, 36px); }
+  .dock-icon { font-size: clamp(12px, 3vw, 14px); }
+  .dock-panel { gap: clamp(1px, 1vw, 3px); padding: 6px clamp(4px, 1vw, 6px) 8px; }
 }
 
 /* ─── GLASS BACK always on top of dock ──────────────────── */
@@ -3053,9 +3059,11 @@ body.app-loaded #dockNav { display:flex !important; }
   z-index: 7000;
   display: none;
   justify-content: center;
-  padding-bottom: env(safe-area-inset-bottom, 0px);
+  align-items: flex-end;
+  padding-bottom: max(env(safe-area-inset-bottom, 0px), 8px);
   background: transparent;
   pointer-events: none;
+  box-sizing: border-box;
 }
 
 .dock-outer {
@@ -3063,19 +3071,25 @@ body.app-loaded #dockNav { display:flex !important; }
   display: flex;
   align-items: flex-end;
   pointer-events: all;
+  max-width: 100vw;
+  min-width: 0;
 }
 
 .dock-panel {
   display: flex;
-  align-items: flex-end;
-  gap: 10px;
+  align-items: center;
+  gap: clamp(2px, 1.5vw, 10px);
   border-radius: 18px;
-  background: rgba(18,9,3,0.88);
+  background: rgba(18,9,3,0.92);
   border: 1px solid rgba(201,162,39,0.25);
-  padding: 10px 14px 12px;
+  padding: 8px clamp(6px, 2vw, 14px) 10px;
   backdrop-filter: blur(18px);
   -webkit-backdrop-filter: blur(18px);
   box-shadow: 0 8px 32px rgba(0,0,0,0.45), 0 0 0 1px rgba(201,162,39,0.08);
+  flex-wrap: nowrap;
+  overflow: visible;
+  max-width: calc(100vw - 16px);
+  box-sizing: border-box;
 }
 
 .dock-item {
@@ -3084,8 +3098,8 @@ body.app-loaded #dockNav { display:flex !important; }
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  width: 48px;
-  height: 48px;
+  width: clamp(36px, 9vw, 48px);
+  height: clamp(36px, 9vw, 48px);
   border-radius: 12px;
   background: rgba(44,24,16,0.7);
   border: 1px solid rgba(201,162,39,0.15);
@@ -3093,6 +3107,7 @@ body.app-loaded #dockNav { display:flex !important; }
   outline: none;
   transition: transform 0.15s ease, background 0.15s ease;
   -webkit-tap-highlight-color: transparent;
+  flex-shrink: 0;
 }
 
 .dock-item:hover {
@@ -3107,7 +3122,7 @@ body.app-loaded #dockNav { display:flex !important; }
 }
 
 .dock-icon {
-  font-size: 20px;
+  font-size: clamp(14px, 3.5vw, 20px);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -3499,70 +3514,100 @@ body.app-loaded #dockNav { display:flex !important; }
 }
 
 /* ─── REACTBITS PROFILE CARD (Holographic) ─────────────────── */
+/* ═══════════════════════════════════════════════════════════
+   PROFILE CARD — React Bits style
+   Full-bleed photo · 3D tilt · bottom text overlay
+   ═══════════════════════════════════════════════════════════ */
+
 .rb-founders-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
   gap: 48px;
-  max-width: 760px;
+  max-width: 720px;
   margin: 0 auto;
   justify-items: center;
-  padding: 20px 0 40px;
+  padding: 20px 0 48px;
 }
 
-.rb-card-scene {
-  perspective: 800px;
+/* ── Scene (perspective wrapper) ───────────────────────── */
+.pc-scene {
+  perspective: 900px;
   width: 300px;
   height: 420px;
   position: relative;
 }
 
-.rb-card {
+/* ── Card ───────────────────────────────────────────────── */
+.pc-card {
   width: 100%;
   height: 100%;
   border-radius: 20px;
   position: relative;
-  transform-style: preserve-3d;
-  transition: transform 0.08s ease-out, box-shadow 0.08s ease-out;
-  cursor: pointer;
   overflow: hidden;
-  background: #0D0502;
+  cursor: pointer;
+  transform-style: preserve-3d;
+  transform: rotateX(0deg) rotateY(0deg) scale(1);
+  transition: transform 0.08s ease-out, box-shadow 0.08s ease-out;
   box-shadow:
-    0 24px 64px rgba(0,0,0,0.75),
-    0 0 0 1px rgba(201,162,39,0.2);
+    0 25px 70px rgba(0,0,0,0.7),
+    0 0 0 1px rgba(255,255,255,0.06);
+  background: #0a0a0a;
+  will-change: transform;
 }
 
-/* Holographic foil layer */
-.rb-card-foil {
+.pc-card:hover {
+  box-shadow:
+    0 35px 90px rgba(0,0,0,0.8),
+    0 0 0 1px rgba(255,255,255,0.1),
+    0 0 60px rgba(201,162,39,0.15);
+}
+
+/* ── Full-bleed photo ───────────────────────────────────── */
+.pc-photo {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: top center;
+  display: block;
+  transform: translateX(calc(var(--px,0) * 6px)) translateY(calc(var(--py,0) * 4px)) scale(1.04);
+  transition: transform 0.08s ease-out;
+  will-change: transform;
+  /* keep natural color — no mix-blend-mode */
+}
+
+.pc-photo-fallback {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 100px;
+  background: linear-gradient(160deg, #3a1010, #0d1a2e);
+}
+
+/* ── Glare (white specular highlight) ──────────────────── */
+.pc-glare {
   position: absolute;
   inset: 0;
   border-radius: inherit;
   z-index: 2;
   pointer-events: none;
   opacity: 0;
-  transition: opacity 0.4s ease;
-  background-image:
-    repeating-linear-gradient(
-      0deg,
-      hsl(2,100%,73%) 0%,
-      hsl(53,100%,69%) 16.67%,
-      hsl(93,100%,69%) 33.33%,
-      hsl(176,100%,76%) 50%,
-      hsl(228,100%,74%) 66.67%,
-      hsl(283,100%,73%) 83.33%,
-      hsl(2,100%,73%) 100%
-    ),
-    radial-gradient(farthest-corner at var(--mx,50%) var(--my,50%), rgba(255,255,255,0.08) 10%, rgba(0,0,0,0.3) 80%);
-  background-blend-mode: color-dodge;
-  background-size: 200% 200%;
-  background-position: var(--foil-x, 50%) var(--foil-y, 50%);
-  mix-blend-mode: color-dodge;
-  filter: brightness(1.1) contrast(1.1) saturate(1.2);
+  transition: opacity 0.25s ease;
+  background: radial-gradient(
+    ellipse at var(--mx,50%) var(--my,50%),
+    rgba(255,255,255,0.18) 0%,
+    rgba(255,255,255,0.04) 35%,
+    transparent 65%
+  );
+  mix-blend-mode: overlay;
 }
-.rb-card:hover .rb-card-foil,
-.rb-card.active .rb-card-foil { opacity: 0.4; }
+.pc-card:hover .pc-glare { opacity: 1; }
 
-/* Glare reflection */
-.rb-card-glare {
+/* ── Rainbow foil shine ─────────────────────────────────── */
+.pc-shine {
   position: absolute;
   inset: 0;
   border-radius: inherit;
@@ -3570,273 +3615,112 @@ body.app-loaded #dockNav { display:flex !important; }
   pointer-events: none;
   opacity: 0;
   transition: opacity 0.3s ease;
-  background: radial-gradient(
-    ellipse at var(--mx,50%) var(--my,50%),
-    rgba(255,255,255,0.22) 0%,
-    rgba(201,162,39,0.06) 30%,
-    transparent 65%
-  );
-  mix-blend-mode: overlay;
-}
-.rb-card:hover .rb-card-glare,
-.rb-card.active .rb-card-glare { opacity: 1; }
-
-/* Card glow behind */
-.rb-card-glow {
-  position: absolute;
-  inset: -20px;
-  border-radius: 30px;
-  z-index: 0;
-  pointer-events: none;
-  opacity: 0;
-  transition: opacity 0.5s ease;
-  background: radial-gradient(
-    ellipse at var(--mx,50%) var(--my,50%),
-    rgba(201,162,39,0.45) 0%,
-    transparent 60%
-  );
-  filter: blur(30px);
-}
-.rb-card-scene:hover .rb-card-glow,
-.rb-card-scene.active .rb-card-glow { opacity: 1; }
-
-/* Card base texture */
-.rb-card-bg {
-  position: absolute;
-  inset: 0;
-  border-radius: inherit;
-  z-index: 1;
-  background:
-    linear-gradient(145deg,
-      rgba(139,26,26,0.25) 0%,
-      rgba(28,11,6,0.9) 40%,
-      rgba(44,24,16,0.95) 100%
+  background-image:
+    repeating-linear-gradient(
+      calc(var(--card-angle, 105deg)),
+      hsl(0,  100%,75%) 0%,
+      hsl(50, 100%,72%) 14%,
+      hsl(100,100%,72%) 28%,
+      hsl(175,100%,76%) 42%,
+      hsl(230,100%,76%) 56%,
+      hsl(280,100%,74%) 70%,
+      hsl(330,100%,74%) 86%,
+      hsl(0,  100%,75%) 100%
     );
+  background-size: 200% 200%;
+  background-position: var(--foil-x,50%) var(--foil-y,50%);
+  mix-blend-mode: color-dodge;
+  filter: brightness(0.9) contrast(1.1) saturate(1.3);
 }
-.rb-card-bg::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  border-radius: inherit;
-  background: repeating-linear-gradient(
-    -45deg,
-    transparent,
-    transparent 3px,
-    rgba(201,162,39,0.025) 3px,
-    rgba(201,162,39,0.025) 6px
-  );
-}
+.pc-card:hover .pc-shine { opacity: 0.28; }
 
-/* Card content */
-.rb-card-content {
+/* ── Bottom gradient vignette ───────────────────────────── */
+.pc-bottom-grad {
   position: absolute;
   inset: 0;
   z-index: 4;
-  display: flex;
-  flex-direction: column;
-  padding: 0;
+  pointer-events: none;
+  background: linear-gradient(
+    to top,
+    rgba(0,0,0,0.92) 0%,
+    rgba(0,0,0,0.55) 30%,
+    rgba(0,0,0,0.15) 55%,
+    transparent 75%
+  );
   border-radius: inherit;
-  overflow: hidden;
 }
 
-/* Avatar fills top 60% */
-.rb-card-avatar-area {
-  flex: 0 0 58%;
-  position: relative;
-  overflow: hidden;
-  border-radius: 20px 20px 0 0;
-  background: linear-gradient(160deg, rgba(139,26,26,0.3), rgba(27,58,107,0.2));
-}
-.rb-card-avatar-img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  object-position: top center;
-  display: block;
-  mix-blend-mode: luminosity;
-  filter: brightness(0.85) contrast(1.05);
-  transform: translateX(calc((var(--from-left, 0.5) - 0.5) * 8px)) translateY(calc((var(--from-top, 0.5) - 0.5) * 4px));
-  transition: transform 0.08s ease-out;
-  will-change: transform;
-}
-.rb-card-avatar-fallback {
-  width: 100%;
-  height: 100%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 80px;
-  background: linear-gradient(160deg, rgba(139,26,26,0.5), rgba(27,58,107,0.3));
-}
-.rb-card-avatar-fade {
+/* ── Text overlay ───────────────────────────────────────── */
+.pc-text {
   position: absolute;
   bottom: 0; left: 0; right: 0;
-  height: 50%;
-  background: linear-gradient(to top, #0D0502 0%, transparent 100%);
+  z-index: 5;
+  padding: 20px 22px 22px;
   pointer-events: none;
 }
-
-/* Bottom info strip */
-.rb-card-info {
-  flex: 1;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 10px 14px 12px;
-  background: transparent;
-  gap: 10px;
-}
-.rb-card-identity {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  min-width: 0;
-}
-.rb-card-mini-avatar {
-  width: 38px;
-  height: 38px;
-  border-radius: 50%;
-  border: 1.5px solid rgba(201,162,39,0.35);
-  overflow: hidden;
-  flex-shrink: 0;
-  background: linear-gradient(135deg, #8B1A1A, #1B3A6B);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 18px;
-}
-.rb-card-mini-avatar img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  border-radius: 50%;
-}
-.rb-card-text { min-width: 0; }
-.rb-card-name {
-  font-family: var(--font-display);
-  font-size: 14px;
-  font-weight: 700;
-  color: rgba(255,255,255,0.92);
-  line-height: 1.1;
-  margin-bottom: 2px;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-.rb-card-role {
-  font-size: 10px;
-  color: rgba(201,162,39,0.7);
+.pc-handle {
   font-family: var(--font-special);
-  letter-spacing: 0.8px;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-/* Action button */
-.rb-card-action-btn {
-  flex-shrink: 0;
-  border: 1px solid rgba(201,162,39,0.4);
-  border-radius: 8px;
-  padding: 8px 13px;
-  font-size: 11px;
-  font-weight: 600;
+  font-size: 10px;
+  letter-spacing: 2.5px;
+  text-transform: uppercase;
   color: var(--tram-gold);
+  opacity: 0.85;
+  margin-bottom: 6px;
+}
+.pc-name {
+  font-family: var(--font-display);
+  font-size: 28px;
+  font-weight: 800;
+  line-height: 1.05;
+  color: #fff;
+  letter-spacing: -0.5px;
+  margin-bottom: 4px;
+  text-shadow: 0 2px 16px rgba(0,0,0,0.6);
+}
+.pc-role {
+  font-family: var(--font-body);
+  font-size: 13px;
+  color: rgba(255,255,255,0.7);
+  letter-spacing: 0.3px;
+  margin-bottom: 16px;
+}
+.pc-btn {
+  pointer-events: auto;
+  display: inline-block;
+  padding: 9px 22px;
+  border-radius: 50px;
+  border: 1.5px solid rgba(255,255,255,0.25);
+  background: rgba(255,255,255,0.1);
+  backdrop-filter: blur(12px);
+  color: #fff;
+  font-family: var(--font-special);
+  font-size: 11px;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
   cursor: pointer;
   transition: all 0.2s ease;
-  background: rgba(201,162,39,0.08);
-  backdrop-filter: blur(8px);
-  font-family: var(--font-body);
-  pointer-events: auto;
-  white-space: nowrap;
 }
-.rb-card-action-btn:hover {
-  border-color: var(--tram-gold);
-  background: rgba(201,162,39,0.16);
+.pc-btn:hover {
+  background: rgba(255,255,255,0.2);
+  border-color: rgba(255,255,255,0.5);
   transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(201,162,39,0.2);
+  box-shadow: 0 4px 16px rgba(0,0,0,0.3);
 }
 
-/* Large name overlay on card — sits inside the avatar area, above the info strip */
-.rb-card-name-overlay {
-  position: absolute;
-  bottom: calc(42% + 4px);
-  left: 16px;
-  right: 16px;
-  z-index: 5;
-  pointer-events: none;
-}
-.rb-card-name-big {
-  font-family: var(--font-display);
-  font-size: clamp(20px, 4vw, 26px);
-  font-weight: 700;
-  line-height: 1.05;
-  background: linear-gradient(to bottom, #fff 0%, #C9A227 100%);
-  -webkit-background-clip: text;
-  background-clip: text;
-  -webkit-text-fill-color: transparent;
-  margin-bottom: 3px;
-  letter-spacing: -0.3px;
-}
-.rb-card-role-big {
-  font-family: var(--font-special);
-  font-size: 9.5px;
-  letter-spacing: 1.8px;
-  background: linear-gradient(to right, rgba(201,162,39,0.9), rgba(139,94,60,0.8));
-  -webkit-background-clip: text;
-  background-clip: text;
-  -webkit-text-fill-color: transparent;
-  text-transform: uppercase;
-}
-
-/* Bio chip bottom of avatar area */
-.rb-card-bio-chip {
-  position: absolute;
-  bottom: 12px;
-  right: 12px;
-  background: rgba(0,0,0,0.55);
-  backdrop-filter: blur(10px);
-  border: 1px solid rgba(201,162,39,0.2);
-  border-radius: 20px;
-  padding: 4px 10px;
-  font-family: var(--font-special);
-  font-size: 7.5px;
-  letter-spacing: 1px;
-  color: rgba(201,162,39,0.7);
-  text-transform: uppercase;
-  pointer-events: none;
-}
-
-/* Info panel backdrop */
-.rb-card-info-backdrop {
-  position: absolute;
-  bottom: 0; left: 0; right: 0;
-  height: 44%;
-  background: rgba(13,5,2,0.0);
-  z-index: 0;
-  pointer-events: none;
-}
-
-/* Mobile touch fallback */
-@media (hover: none) {
-  .rb-card-foil { opacity: 0.15; }
-  .rb-card-glare { opacity: 0.5; }
-  .rb-card-scene:hover .rb-card-glow { opacity: 0.6; }
-}
-
-/* Subtle border-edge shine */
-.rb-card::after {
+/* ── Border-edge shimmer (gold for Tuhin, blue for Priyanshu) ── */
+.pc-card::after {
   content: '';
   position: absolute;
   inset: 0;
   border-radius: inherit;
   border: 1.5px solid transparent;
-  background: linear-gradient(var(--card-angle, 145deg),
-    rgba(201,162,39,0.55),
+  background: linear-gradient(
+    var(--card-angle, 145deg),
+    rgba(201,162,39,0.6),
     rgba(201,162,39,0.1) 30%,
     transparent 60%,
     rgba(201,162,39,0.08) 80%,
-    rgba(201,162,39,0.4)
+    rgba(201,162,39,0.45)
   ) border-box;
   -webkit-mask: linear-gradient(#fff 0 0) padding-box, linear-gradient(#fff 0 0);
   -webkit-mask-composite: destination-out;
@@ -3844,36 +3728,47 @@ body.app-loaded #dockNav { display:flex !important; }
   pointer-events: none;
   z-index: 6;
 }
+.pc-card.pc-card-blue::after {
+  background: linear-gradient(
+    var(--card-angle, 145deg),
+    rgba(100,160,255,0.6),
+    rgba(100,160,255,0.1) 30%,
+    transparent 60%,
+    rgba(100,160,255,0.08) 80%,
+    rgba(100,160,255,0.45)
+  ) border-box;
+}
 
-/* Priyanshu card uses blue accent */
-.rb-card.rb-card-blue .rb-card-bg {
-  background: linear-gradient(145deg,
-    rgba(27,58,107,0.25) 0%,
-    rgba(28,11,6,0.9) 40%,
-    rgba(13,20,35,0.95) 100%
+/* ── Outer glow behind card ─────────────────────────────── */
+.pc-scene::before {
+  content: '';
+  position: absolute;
+  inset: -24px;
+  border-radius: 36px;
+  z-index: -1;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.4s ease;
+  background: radial-gradient(
+    ellipse at 50% 80%,
+    rgba(201,162,39,0.4) 0%,
+    transparent 65%
+  );
+  filter: blur(24px);
+}
+.pc-scene:hover::before { opacity: 1; }
+.pc-scene:has(.pc-card-blue):hover::before {
+  background: radial-gradient(
+    ellipse at 50% 80%,
+    rgba(80,130,240,0.4) 0%,
+    transparent 65%
   );
 }
-.rb-card.rb-card-blue .rb-card-foil {
-  background-image:
-    repeating-linear-gradient(
-      0deg,
-      hsl(220,100%,73%) 0%,
-      hsl(180,100%,69%) 25%,
-      hsl(270,100%,73%) 50%,
-      hsl(200,100%,74%) 75%,
-      hsl(220,100%,73%) 100%
-    ),
-    radial-gradient(farthest-corner at var(--mx,50%) var(--my,50%), rgba(255,255,255,0.08) 10%, rgba(0,0,0,0.3) 80%);
-  background-blend-mode: color-dodge;
-}
-.rb-card.rb-card-blue::after {
-  background: linear-gradient(var(--card-angle, 145deg),
-    rgba(100,140,220,0.55),
-    rgba(100,140,220,0.1) 30%,
-    transparent 60%,
-    rgba(100,140,220,0.08) 80%,
-    rgba(100,140,220,0.4)
-  ) border-box;
+
+/* ── Mobile fallback ────────────────────────────────────── */
+@media (hover: none) {
+  .pc-shine  { opacity: 0.12; }
+  .pc-glare  { opacity: 0.5; }
 }
 
 
@@ -3937,40 +3832,5 @@ body.app-loaded .dock-nav { display: flex !important; }
 /* All AR overlays above video */
 .ar-scanline, .ar-corners, .ar-camera-label,
 .ar-overlay-content, .ar-scan-progress { z-index: 3 !important; position: absolute; }
-
-/* ── HOLOGRAPHIC CARD v2 ────────────────────────────────────── */
-.rb-card-foil {
-  animation: foilShift 8s linear infinite;
-}
-@keyframes foilShift {
-  0%   { filter: brightness(1.1) hue-rotate(0deg) saturate(1.2); }
-  50%  { filter: brightness(1.2) hue-rotate(180deg) saturate(1.5); }
-  100% { filter: brightness(1.1) hue-rotate(360deg) saturate(1.2); }
-}
-.rb-card:hover .rb-card-foil,
-.rb-card.active .rb-card-foil {
-  animation: none;
-  opacity: 0.5;
-  filter: brightness(1.25) hue-rotate(var(--hue-rot, 0deg)) saturate(1.6) contrast(1.1);
-}
-/* Prismatic edge shimmer */
-.rb-card::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  border-radius: inherit;
-  z-index: 7;
-  pointer-events: none;
-  background: linear-gradient(
-    calc(var(--card-angle, 145deg)),
-    transparent 20%,
-    rgba(255,255,255,0.04) 40%,
-    rgba(255,220,100,0.07) 50%,
-    transparent 70%
-  );
-  opacity: 0;
-  transition: opacity 0.3s ease;
-}
-.rb-card:hover::before { opacity: 1; }
 
 /* Lanyard physics container removed */
