@@ -1,2 +1,3 @@
 # CalKotha-
-CalKotha reimagines Kolkata’s heritage for the digital generation through AI-guided exploration, AR-powered storytelling, heritage passports, collectible stamps, smart route planning, tram-based cultural trails, and community-driven preservation of the city’s living history.
+CalKotha is a next-generation cultural discovery platform that makes Kolkata’s heritage interactive, immersive, and accessible through AI, AR, gamification, and community engagement.
+
