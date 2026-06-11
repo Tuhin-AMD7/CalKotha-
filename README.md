@@ -108,7 +108,7 @@ CalKotha is a **zero-dependency PWA** — no build tools, no frameworks, no back
 
 ```bash
 # Clone the repository
-git clone https://github.com/YOUR_USERNAME/CalKotha.git
+git clone https://github.com/Tuhin-AMD7/CalKotha-.git
 cd CalKotha
 
 # Serve with Python (or any static server)
